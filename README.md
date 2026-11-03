@@ -4,7 +4,7 @@ A widescreen **Android Automotive OS (AAOS)** In-Vehicle Infotainment (IVI) cock
 
 <p align="center">
   <!-- Paste your GitHub issue-uploaded GIF or screenshot URL here -->
-  <img src="https://github.com/user-attachments/assets/YOUR-AUTOMOTIVE-GIF-ID-HERE" alt="VoltPilot EV Cockpit" width="720"/>
+  <img width="2992" height="1344" alt="Image" src="https://github.com/user-attachments/assets/5e5df86b-6840-43b8-9b6c-c0f767745eec" />
 </p>
 
 ---
