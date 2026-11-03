@@ -7,16 +7,14 @@ import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bekacodes.voltpilotev.data.local.VoltPilotDatabase
 import com.bekacodes.voltpilotev.ui.VoltPilotCockpitScreen
 import com.bekacodes.voltpilotev.ui.VoltPilotViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val database by lazy { VoltPilotDatabase.getInstance(applicationContext) }
-    private val viewModel: VoltPilotViewModel by viewModels {
-        VoltPilotViewModel.provideFactory(database.dao())
-    }
+    private val viewModel: VoltPilotViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,7 +1,5 @@
 package com.bekacodes.voltpilotev.ui.components
 
-
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -25,6 +24,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,99 +46,127 @@ fun IntelligentRouteMapCanvas(
     isNavigationActive: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val gridColor = Color(0xFF152033)
+    val altRoadColor = Color(0xFF283548)
+    val originBgColor = Color(0xFF0D2235)
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFF080D16))
             .border(1.dp, VpBorder, RoundedCornerShape(12.dp))
+            .semantics {
+                contentDescription = "Intelligent route map to ${stop.stationName} via ${stop.highwayRoute}, ${stop.distanceMiles} miles ahead"
+            }
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
-            val h = size.height
+        Spacer(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawWithCache {
+                    val w = size.width
+                    val h = size.height
 
-            // Subtle dark terrain polygons & road grid
-            val gridColor = Color(0xFF152033)
-            for (i in 1..4) {
-                val y = h * (i / 5f)
-                drawLine(
-                    gridColor,
-                    Offset(w * 0.45f, y),
-                    Offset(w * 0.92f, y),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
-            for (i in 1..3) {
-                val x = w * (0.48f + i * 0.11f)
-                drawLine(
-                    gridColor,
-                    Offset(x - 18.dp.toPx(), h * 0.22f),
-                    Offset(x + 18.dp.toPx(), h * 0.85f),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
+                    // Grid & road parameters
+                    val horizontalGridLines = (1..4).map { i ->
+                        val y = h * (i / 5f)
+                        Offset(w * 0.45f, y) to Offset(w * 0.92f, y)
+                    }
+                    val verticalGridLines = (1..3).map { i ->
+                        val x = w * (0.48f + i * 0.11f)
+                        Offset(x - 18.dp.toPx(), h * 0.22f) to Offset(x + 18.dp.toPx(), h * 0.85f)
+                    }
 
-            // Secondary gray road path
-            val altPath = Path().apply {
-                moveTo(w * 0.28f, h * 0.78f)
-                lineTo(w * 0.36f, h * 0.78f)
-                lineTo(w * 0.48f, h * 0.54f)
-                lineTo(w * 0.80f, h * 0.32f)
-            }
-            drawPath(
-                path = altPath,
-                color = Color(0xFF283548),
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
+                    // Secondary gray road path
+                    val altPath = Path().apply {
+                        moveTo(w * 0.28f, h * 0.78f)
+                        lineTo(w * 0.36f, h * 0.78f)
+                        lineTo(w * 0.48f, h * 0.54f)
+                        lineTo(w * 0.80f, h * 0.32f)
+                    }
+                    val altStroke = Stroke(
+                        width = 3.dp.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
 
-            // Primary glowing cyan route path
-            val routePath = Path().apply {
-                moveTo(w * 0.28f, h * 0.78f)
-                lineTo(w * 0.35f, h * 0.78f)
-                lineTo(w * 0.46f, h * 0.52f)
-                lineTo(w * 0.65f, h * 0.42f)
-                lineTo(w * 0.80f, h * 0.30f)
-            }
+                    // Primary glowing cyan route path
+                    val routePath = Path().apply {
+                        moveTo(w * 0.28f, h * 0.78f)
+                        lineTo(w * 0.35f, h * 0.78f)
+                        lineTo(w * 0.46f, h * 0.52f)
+                        lineTo(w * 0.65f, h * 0.42f)
+                        lineTo(w * 0.80f, h * 0.30f)
+                    }
+                    val glowStroke = Stroke(
+                        width = 9.dp.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                    val coreStroke = Stroke(
+                        width = 3.dp.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
 
-            // Outer cyan glow
-            drawPath(
-                path = routePath,
-                color = VpCyan.copy(alpha = if (isNavigationActive) 0.40f else 0.22f),
-                style = Stroke(width = 9.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
-            // Core cyan line
-            drawPath(
-                path = routePath,
-                color = VpCyan,
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-            )
+                    // Origin & Destination Nodes
+                    val origin = Offset(w * 0.28f, h * 0.78f)
+                    val dest = Offset(w * 0.80f, h * 0.30f)
+                    val destTopLeft = Offset(dest.x - 12.dp.toPx(), dest.y - 12.dp.toPx())
+                    val destSize = Size(24.dp.toPx(), 24.dp.toPx())
+                    val destCorner = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+                    val destBorderStroke = Stroke(1.5.dp.toPx())
+                    val originRingStroke = Stroke(1.5.dp.toPx())
 
-            // Origin Vehicle Node Circle
-            val origin = Offset(w * 0.28f, h * 0.78f)
-            drawCircle(Color(0xFF0D2235), radius = 10.dp.toPx(), center = origin)
-            drawCircle(
-                VpCyan,
-                radius = 10.dp.toPx(),
-                center = origin,
-                style = Stroke(1.5.dp.toPx())
-            )
-            drawCircle(VpCyan, radius = 3.5.dp.toPx(), center = origin)
+                    val gridStrokeWidth = 1.dp.toPx()
 
-            // Destination Emerald Charger Pin Box
-            val dest = Offset(w * 0.80f, h * 0.30f)
-            drawRoundRect(
-                color = VpEmerald,
-                topLeft = Offset(dest.x - 12.dp.toPx(), dest.y - 12.dp.toPx()),
-                size = Size(24.dp.toPx(), 24.dp.toPx()),
-                cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-            )
-            drawRoundRect(
-                color = Color.White,
-                topLeft = Offset(dest.x - 12.dp.toPx(), dest.y - 12.dp.toPx()),
-                size = Size(24.dp.toPx(), 24.dp.toPx()),
-                cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx()),
-                style = Stroke(1.5.dp.toPx())
-            )
-        }
+                    onDrawWithContent {
+                        // Subtle dark terrain polygons & road grid
+                        horizontalGridLines.forEach { (start, end) ->
+                            drawLine(gridColor, start, end, strokeWidth = gridStrokeWidth)
+                        }
+                        verticalGridLines.forEach { (start, end) ->
+                            drawLine(gridColor, start, end, strokeWidth = gridStrokeWidth)
+                        }
+
+                        // Secondary gray road path
+                        drawPath(path = altPath, color = altRoadColor, style = altStroke)
+
+                        // Outer cyan glow
+                        drawPath(
+                            path = routePath,
+                            color = VpCyan.copy(alpha = if (isNavigationActive) 0.40f else 0.22f),
+                            style = glowStroke
+                        )
+                        // Core cyan line
+                        drawPath(path = routePath, color = VpCyan, style = coreStroke)
+
+                        // Origin Vehicle Node Circle
+                        drawCircle(originBgColor, radius = 10.dp.toPx(), center = origin)
+                        drawCircle(
+                            VpCyan,
+                            radius = 10.dp.toPx(),
+                            center = origin,
+                            style = originRingStroke
+                        )
+                        drawCircle(VpCyan, radius = 3.5.dp.toPx(), center = origin)
+
+                        // Destination Emerald Charger Pin Box
+                        drawRoundRect(
+                            color = VpEmerald,
+                            topLeft = destTopLeft,
+                            size = destSize,
+                            cornerRadius = destCorner
+                        )
+                        drawRoundRect(
+                            color = Color.White,
+                            topLeft = destTopLeft,
+                            size = destSize,
+                            cornerRadius = destCorner,
+                            style = destBorderStroke
+                        )
+                    }
+                }
+        )
 
         // Map Overlays & Labels matching Figma screenshot
         Text(

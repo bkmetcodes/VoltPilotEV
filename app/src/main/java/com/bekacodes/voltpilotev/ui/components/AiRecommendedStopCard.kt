@@ -24,6 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -165,21 +169,27 @@ fun AiRecommendedStopCard(
                 targetValue = if (uiState.isNavigationActive) VpEmerald else VpCyan,
                 label = "CtaBgColor"
             )
+            val ctaLabel = if (uiState.isNavigationActive) {
+                "✓ Routing Active · Preconditioning Battery (${uiState.batteryTempF}°F)"
+            } else {
+                "▶  Route & Precondition Battery"
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(ctaColor)
+                    .semantics {
+                        contentDescription = ctaLabel
+                        role = Role.Button
+                    }
                     .clickable(onClick = onRouteAndPrecondition),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (uiState.isNavigationActive) {
-                        "✓ Routing Active · Preconditioning Battery (${uiState.batteryTempF}°F)"
-                    } else {
-                        "▶  Route & Precondition Battery"
-                    },
+                    text = ctaLabel,
                     color = Color(0xFF041019),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold

@@ -14,6 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,13 +44,22 @@ fun HvacTempControl(
                 .clip(RoundedCornerShape(8.dp))
                 .background(VpCard)
                 .border(1.dp, VpBorder, RoundedCornerShape(8.dp))
+                .semantics {
+                    contentDescription = "Decrease $roleLabel temperature"
+                    role = Role.Button
+                }
                 .clickable(onClick = onDecrement),
             contentAlignment = Alignment.Center
         ) {
             Text("−", color = VpSecondary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = "$roleLabel temperature $tempF degrees Fahrenheit"
+            }
+        ) {
             Text(
                 text = roleLabel,
                 color = VpMuted,
@@ -68,6 +81,10 @@ fun HvacTempControl(
                 .clip(RoundedCornerShape(8.dp))
                 .background(VpCard)
                 .border(1.dp, VpBorder, RoundedCornerShape(8.dp))
+                .semantics {
+                    contentDescription = "Increase $roleLabel temperature"
+                    role = Role.Button
+                }
                 .clickable(onClick = onIncrement),
             contentAlignment = Alignment.Center
         ) {

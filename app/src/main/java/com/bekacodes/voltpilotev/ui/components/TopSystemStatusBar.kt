@@ -21,6 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,6 +71,10 @@ fun TopSystemStatusBar(
                                 color = if (selected) VpCyan else VpBorder,
                                 shape = RoundedCornerShape(7.dp)
                             )
+                            .semantics {
+                                contentDescription = "Select gear ${gear.label}"
+                                role = Role.Button
+                            }
                             .clickable { onSelectGear(gear) },
                         contentAlignment = Alignment.Center
                     ) {
@@ -98,6 +106,9 @@ fun TopSystemStatusBar(
                         .clip(RoundedCornerShape(6.dp))
                         .background(badgeBg)
                         .border(1.dp, badgeBorder, RoundedCornerShape(6.dp))
+                        .semantics {
+                            contentDescription = "Vehicle safety mode: $badgeLabel"
+                        }
                         .padding(horizontal = 10.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

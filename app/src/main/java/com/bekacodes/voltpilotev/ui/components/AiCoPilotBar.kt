@@ -22,6 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,6 +45,14 @@ fun AiCoPilotBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
+            .semantics {
+                contentDescription = if (isDriveRestricted) {
+                    "AI Co-Pilot bar in voice-only mode. Current prompt: $promptText. Tap to cycle preset voice commands."
+                } else {
+                    "AI Co-Pilot prompt bar. Current prompt: $promptText. Tap to open custom input dialog."
+                }
+                role = Role.Button
+            }
             .clickable(onClick = onBarClick),
         shape = RoundedCornerShape(16.dp),
         color = Color(0xFF0E1324),
@@ -59,6 +71,10 @@ fun AiCoPilotBar(
                     .size(38.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(VpIndigo)
+                    .semantics {
+                        contentDescription = "Cycle AI voice command presets"
+                        role = Role.Button
+                    }
                     .clickable(onClick = onMicClick),
                 contentAlignment = Alignment.Center
             ) {

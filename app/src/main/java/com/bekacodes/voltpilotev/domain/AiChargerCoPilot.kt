@@ -1,9 +1,12 @@
 package com.bekacodes.voltpilotev.domain
 
 import com.bekacodes.voltpilotev.ui.ChargerStopRecommendation
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.roundToInt
 
-class AiChargerCoPilot {
+@Singleton
+open class AiChargerCoPilot @Inject constructor() {
 
     private val corridorChargers = listOf(
         ChargerStopRecommendation(
@@ -56,7 +59,7 @@ class AiChargerCoPilot {
      * - "Find a 350kW ultra-fast charger within 60 miles with a lounge"
      * - "Find the closest 150kW+ charger under 15 miles with food"
      */
-    fun resolveOptimalStop(
+    open fun resolveOptimalStop(
         query: String,
         currentSocPercent: Int
     ): ChargerStopRecommendation {

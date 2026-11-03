@@ -1,22 +1,24 @@
 package com.bekacodes.voltpilotev.ui
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.bekacodes.voltpilotev.data.local.CabinProfileEntity
-import com.bekacodes.voltpilotev.data.local.VoltPilotDao
-import com.bekacodes.voltpilotev.data.vhal.VehicleHalEngine
+import com.bekacodes.voltpilotev.data.local.CabinProfileRepository
+import com.bekacodes.voltpilotev.data.vhal.VehicleHalDataSource
 import com.bekacodes.voltpilotev.domain.AiChargerCoPilot
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class VoltPilotViewModel(
-    private val dao: VoltPilotDao,
-    private val vhalEngine: VehicleHalEngine = VehicleHalEngine(),
-    private val aiCoPilot: AiChargerCoPilot = AiChargerCoPilot()
+@HiltViewModel
+class VoltPilotViewModel @Inject constructor(
+    private val repository: CabinProfileRepository,
+    private val vhalDataSource: VehicleHalDataSource,
+    private val aiCoPilot: AiChargerCoPilot
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VoltPilotUiState())
@@ -26,7 +28,7 @@ class VoltPilotViewModel(
         // 1. Restore saved driver cabin & drive mode profile from Room SQLite
         viewModelScope.launch {
             val saved =
-                dao.getProfileSnapshot() ?: CabinProfileEntity().also { dao.saveProfile(it) }
+                repository.getProfileSnapshot() ?: CabinProfileEntity().also { repository.saveProfile(it) }
             val restoredMode =
                 runCatching { DriveMode.valueOf(saved.driveModeName) }.getOrDefault(DriveMode.COMFORT)
             val initialStop =
@@ -47,7 +49,7 @@ class VoltPilotViewModel(
 
         // 2. Collect continuous 500ms VHAL telemetry stream
         viewModelScope.launch {
-            vhalEngine.observeTelemetry(
+            vhalDataSource.observeTelemetry(
                 gearProvider = { _uiState.value.activeGear },
                 driveModeProvider = { _uiState.value.driveMode },
                 preconditioningProvider = { _uiState.value.isPreconditioningActive }
@@ -219,7 +221,7 @@ class VoltPilotViewModel(
     private fun persistCabinProfile() {
         val snapshot = _uiState.value
         viewModelScope.launch {
-            dao.saveProfile(
+            repository.saveProfile(
                 CabinProfileEntity(
                     profileId = 1,
                     driveModeName = snapshot.driveMode.name,
@@ -231,15 +233,5 @@ class VoltPilotViewModel(
                 )
             )
         }
-    }
-
-    companion object {
-        fun provideFactory(dao: VoltPilotDao): ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return VoltPilotViewModel(dao) as T
-                }
-            }
     }
 }
